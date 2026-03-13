@@ -87,6 +87,13 @@ onMounted(() => {
   const els = document.querySelectorAll('[data-reveal]');
   if (!els.length) return;
 
+  document.documentElement.classList.add('has-reveal-js');
+
+  if (typeof window.IntersectionObserver !== "function") {
+    for (const el of els) el.classList.add('is-visible');
+    return;
+  }
+
   revealObserver = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {

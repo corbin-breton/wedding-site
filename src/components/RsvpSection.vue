@@ -22,164 +22,167 @@
             />
           </div>
 
-          <!-- Attending toggle -->
-          <div class="form-group">
-            <label class="form-label">Will you be attending? <span class="req">*</span></label>
-            <div class="toggle-group">
-              <button
-                  type="button"
-                  class="toggle-btn"
-                  :class="{ 'toggle-btn--active': form.attending === 'accepts' }"
-                  @click="setAttending('accepts')"
+          <!-- Attending choice -->
+          <fieldset class="form-group choice-fieldset">
+            <legend class="form-label">Will you be attending? <span class="req">*</span></legend>
+            <div class="choice-list" role="radiogroup" aria-label="Attendance">
+              <label
+                  class="choice-card"
+                  :class="{ 'choice-card--active': form.attending === 'accepts' }"
               >
-                Joyfully accept
-              </button>
-              <button
-                  type="button"
-                  class="toggle-btn"
-                  :class="{ 'toggle-btn--active': form.attending === 'declines' }"
-                  @click="setAttending('declines')"
+                <input
+                    v-model="form.attending"
+                    class="choice-card__input"
+                    type="radio"
+                    name="rsvp-attending"
+                    value="accepts"
+                />
+                <span class="choice-card__label">Joyfully accept</span>
+              </label>
+
+              <label
+                  class="choice-card"
+                  :class="{ 'choice-card--active': form.attending === 'declines' }"
               >
-                Regretfully decline
-              </button>
+                <input
+                    v-model="form.attending"
+                    class="choice-card__input"
+                    type="radio"
+                    name="rsvp-attending"
+                    value="declines"
+                />
+                <span class="choice-card__label">Regretfully decline</span>
+              </label>
             </div>
-          </div>
+          </fieldset>
 
-          <!-- ═══ Accept path ═══ -->
-          <div class="form-section" :class="{ 'form-section--open': form.attending === 'accepts' }">
-            <div class="form-section__inner">
+          <!-- Accept path -->
+          <div v-show="isAccepting" class="detail-block">
+            <hr class="form-divider" />
 
-              <hr class="form-divider" />
+            <div class="form-group">
+              <label class="form-label" for="rsvp-party">
+                How many people are in your party (including yourself): <span class="req">*</span>
+              </label>
+              <input
+                  id="rsvp-party"
+                  v-model.number="form.partySize"
+                  type="number"
+                  class="form-input form-input--narrow"
+                  min="1"
+                  max="20"
+                  step="1"
+                  inputmode="numeric"
+              />
+            </div>
 
-              <!-- Party size -->
+            <div v-show="showKidsFields" class="detail-block detail-block--sub">
               <div class="form-group">
-                <label class="form-label" for="rsvp-party">
-                  How many people are in your party (including yourself): <span class="req">*</span>
+                <label class="form-label form-label--sub" for="rsvp-kids-under5">
+                  Number of kids 5 &amp; under: <span class="req">*</span>
                 </label>
                 <input
-                    id="rsvp-party"
-                    v-model.number="form.partySize"
+                    id="rsvp-kids-under5"
+                    v-model.number="form.kidsUnder5"
                     type="number"
                     class="form-input form-input--narrow"
-                    min="1"
+                    min="0"
                     max="20"
-                />
-              </div>
-
-              <!-- Kids fields (shown if party > 1) -->
-              <div class="form-section" :class="{ 'form-section--open': form.partySize > 1 }">
-                <div class="form-section__inner">
-                  <div class="form-group">
-                    <label class="form-label form-label--sub" for="rsvp-kids-under5">
-                      Number of kids 5 &amp; under: <span class="req">*</span>
-                    </label>
-                    <input
-                        id="rsvp-kids-under5"
-                        v-model.number="form.kidsUnder5"
-                        type="number"
-                        class="form-input form-input--narrow"
-                        min="0"
-                        max="20"
-                    />
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label form-label--sub" for="rsvp-kids-6to10">
-                      Number of kids 6–10: <span class="req">*</span>
-                    </label>
-                    <input
-                        id="rsvp-kids-6to10"
-                        v-model.number="form.kids6to10"
-                        type="number"
-                        class="form-input form-input--narrow"
-                        min="0"
-                        max="20"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Dietary -->
-              <div class="form-group">
-                <label class="form-label" for="rsvp-dietary">Dietary restrictions or allergies?</label>
-                <textarea
-                    id="rsvp-dietary"
-                    v-model="form.dietary"
-                    class="form-input form-textarea"
-                    rows="2"
-                    placeholder="Vegetarian, gluten-free, nut allergy, etc."
-                    @input="autoGrow"
-                ></textarea>
-              </div>
-
-              <hr class="form-divider" />
-
-              <!-- Contact info -->
-              <div class="form-group">
-                <h3 class="contact-heading">Contact Info</h3>
-                <p class="contact-desc">We will only use information left here to provide last-minute updates or to answer any questions.</p>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="rsvp-email">Email (optional)</label>
-                <input
-                    id="rsvp-email"
-                    v-model="form.email"
-                    type="email"
-                    class="form-input"
-                    autocomplete="email"
-                    placeholder="john.smith4@gmail.com"
+                    step="1"
+                    inputmode="numeric"
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="rsvp-phone">Phone number (optional)</label>
+                <label class="form-label form-label--sub" for="rsvp-kids-6to10">
+                  Number of kids 6-10: <span class="req">*</span>
+                </label>
                 <input
-                    id="rsvp-phone"
-                    :value="form.phone"
-                    @input="onPhoneInput"
-                    type="tel"
-                    class="form-input"
-                    autocomplete="tel"
-                    placeholder="(123) 456-7890"
+                    id="rsvp-kids-6to10"
+                    v-model.number="form.kids6to10"
+                    type="number"
+                    class="form-input form-input--narrow"
+                    min="0"
+                    max="20"
+                    step="1"
+                    inputmode="numeric"
                 />
               </div>
             </div>
-          </div>
 
-          <!-- ═══ Comments (shown for BOTH accept and decline) ═══ -->
-          <div class="form-section" :class="{ 'form-section--open': form.attending !== '' }">
-            <div class="form-section__inner">
-              <hr class="form-divider" />
+            <div class="form-group">
+              <label class="form-label" for="rsvp-dietary">Dietary restrictions or allergies?</label>
+              <textarea
+                  id="rsvp-dietary"
+                  v-model="form.dietary"
+                  class="form-input form-textarea"
+                  rows="2"
+                  placeholder="Vegetarian, gluten-free, nut allergy, etc."
+                  @input="autoGrow"
+              ></textarea>
+            </div>
 
-              <div class="form-group">
-                <label class="form-label" for="rsvp-comments">Anything else we should know?</label>
-                <textarea
-                    id="rsvp-comments"
-                    v-model="form.comments"
-                    class="form-input form-textarea"
-                    rows="3"
-                    @input="autoGrow"
-                ></textarea>
-              </div>
+            <hr class="form-divider" />
 
-              <p v-if="deadlineText" class="text muted form-deadline">{{ deadlineText }}</p>
+            <div class="form-group">
+              <h3 class="contact-heading">Contact Info</h3>
+              <p class="contact-desc">We will only use information left here to provide last-minute updates or to answer any questions.</p>
+            </div>
 
-              <button
-                  type="submit"
-                  class="btn submit-btn"
-                  :class="{ 'is-shaking': shaking }"
-                  :disabled="submitting"
-              >
-                {{ submitting ? 'Sending...' : 'Submit' }}
-                <svg v-if="!submitting" class="submit-arrow" viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="M4 10h12m-5-5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
+            <div class="form-group">
+              <label class="form-label" for="rsvp-email">Email (optional)</label>
+              <input
+                  id="rsvp-email"
+                  v-model="form.email"
+                  type="email"
+                  class="form-input"
+                  autocomplete="email"
+                  placeholder="john.smith4@gmail.com"
+              />
+            </div>
 
-              <p class="form-error" :class="{ 'form-error--visible': error }">{{ error }}</p>
+            <div class="form-group">
+              <label class="form-label" for="rsvp-phone">Phone number (optional)</label>
+              <input
+                  id="rsvp-phone"
+                  v-model="form.phone"
+                  type="tel"
+                  class="form-input"
+                  autocomplete="tel"
+                  inputmode="tel"
+                  placeholder="(123) 456-7890"
+              />
             </div>
           </div>
+
+          <hr v-if="form.attending" class="form-divider" />
+
+          <div class="form-group">
+            <label class="form-label" for="rsvp-comments">Anything else we should know?</label>
+            <textarea
+                id="rsvp-comments"
+                v-model="form.comments"
+                class="form-input form-textarea"
+                rows="3"
+                @input="autoGrow"
+            ></textarea>
+          </div>
+
+          <p v-if="deadlineText" class="text muted form-deadline">{{ deadlineText }}</p>
+
+          <button
+              type="submit"
+              class="btn submit-btn"
+              :class="{ 'is-shaking': shaking }"
+              :disabled="submitting"
+          >
+            {{ submitting ? 'Sending...' : 'Submit' }}
+            <svg v-if="!submitting" class="submit-arrow" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M4 10h12m-5-5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <p class="form-error" :class="{ 'form-error--visible': error }">{{ error }}</p>
         </form>
 
         <!-- Success state -->
@@ -200,7 +203,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 
 const props = defineProps({
   title: { type: String, default: "RSVP" },
@@ -227,50 +230,13 @@ const submitted = ref(false);
 const error = ref("");
 const shaking = ref(false);
 
-function setAttending(value) {
-  form.attending = value;
-}
+const isAccepting = computed(() => form.attending === "accepts");
+const showKidsFields = computed(() => isAccepting.value && Number(form.partySize) > 1);
 
 function autoGrow(e) {
   const el = e.target;
   el.style.height = "auto";
   el.style.height = el.scrollHeight + "px";
-}
-
-// ── Phone auto-format ──────────────────────────────────────────────
-
-function formatPhone(raw) {
-  const digits = raw.replace(/\D/g, "").slice(0, 10);
-  if (digits.length === 0) return "";
-  if (digits.length <= 3) return `(${digits}`;
-  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-}
-
-function onPhoneInput(e) {
-  const input = e.target;
-  const raw = input.value;
-  const formatted = formatPhone(raw);
-  form.phone = formatted;
-
-  // Keep cursor from jumping to end
-  const digitsBeforeCursor = raw.slice(0, input.selectionStart).replace(/\D/g, "").length;
-  // Find where that digit count lands in the formatted string
-  let digitsSeen = 0;
-  let cursorPos = 0;
-  for (let i = 0; i < formatted.length; i++) {
-    if (/\d/.test(formatted[i])) digitsSeen++;
-    if (digitsSeen >= digitsBeforeCursor) {
-      cursorPos = i + 1;
-      break;
-    }
-  }
-  if (digitsBeforeCursor === 0) cursorPos = formatted.length;
-
-  requestAnimationFrame(() => {
-    input.value = formatted;
-    input.setSelectionRange(cursorPos, cursorPos);
-  });
 }
 
 // ── Validation helpers ─────────────────────────────────────────────
@@ -281,8 +247,27 @@ function isValidEmail(email) {
 }
 
 function isValidPhone(phone) {
-  if (!phone) return true; // optional
-  return phone.replace(/\D/g, "").length === 10;
+  return normalizePhone(phone) !== null;
+}
+
+function normalizePhone(phone) {
+  if (!phone) return "";
+
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return "";
+
+  const normalized = digits.length === 11 && digits.startsWith("1")
+    ? digits.slice(1)
+    : digits;
+
+  if (normalized.length !== 10) return null;
+
+  return `(${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6)}`;
+}
+
+function toWholeNumber(value) {
+  const num = Number(value);
+  return Number.isInteger(num) ? num : null;
 }
 
 function triggerShake() {
@@ -310,20 +295,24 @@ async function onSubmit() {
   }
 
   // Accept-path validation
-  if (form.attending === "accepts") {
-    if (!form.partySize || form.partySize < 1) {
+  if (isAccepting.value) {
+    const partySize = toWholeNumber(form.partySize);
+    if (!partySize || partySize < 1) {
       error.value = "Please enter your party size.";
       triggerShake();
       return;
     }
 
-    if (form.partySize > 1) {
-      if (typeof form.kidsUnder5 !== "number" || form.kidsUnder5 < 0) {
+    if (partySize > 1) {
+      const kidsUnder5 = toWholeNumber(form.kidsUnder5);
+      const kids6to10 = toWholeNumber(form.kids6to10);
+
+      if (kidsUnder5 === null || kidsUnder5 < 0) {
         error.value = "Please enter the number of kids 5 & under (enter 0 if none).";
         triggerShake();
         return;
       }
-      if (typeof form.kids6to10 !== "number" || form.kids6to10 < 0) {
+      if (kids6to10 === null || kids6to10 < 0) {
         error.value = "Please enter the number of kids 6–10 (enter 0 if none).";
         triggerShake();
         return;
@@ -352,17 +341,20 @@ async function onSubmit() {
   submitting.value = true;
 
   try {
-    const isAccepting = form.attending === "accepts";
+    const partySize = toWholeNumber(form.partySize) || 0;
+    const kidsUnder5 = toWholeNumber(form.kidsUnder5) || 0;
+    const kids6to10 = toWholeNumber(form.kids6to10) || 0;
+    const normalizedPhone = normalizePhone(form.phone);
     const payload = {
       timestamp: new Date().toISOString(),
       name: form.name.trim(),
       attending: form.attending,
-      partySize: isAccepting ? form.partySize : 0,
-      kidsUnder5: isAccepting && form.partySize > 1 ? form.kidsUnder5 : 0,
-      kids6to10: isAccepting && form.partySize > 1 ? form.kids6to10 : 0,
-      dietary: isAccepting ? form.dietary.trim() : "",
-      email: isAccepting ? form.email.trim() : "",
-      phone: isAccepting ? form.phone : "",
+      partySize: isAccepting.value ? partySize : 0,
+      kidsUnder5: isAccepting.value && partySize > 1 ? kidsUnder5 : 0,
+      kids6to10: isAccepting.value && partySize > 1 ? kids6to10 : 0,
+      dietary: isAccepting.value ? form.dietary.trim() : "",
+      email: isAccepting.value ? form.email.trim() : "",
+      phone: isAccepting.value ? normalizedPhone || "" : "",
       comments: form.comments.trim(),
     };
 
@@ -393,18 +385,18 @@ async function onSubmit() {
   margin-bottom: 1rem;
 }
 
+.choice-fieldset {
+  border: 0;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
 .form-label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 650;
   font-size: 0.92rem;
   color: var(--ink);
-}
-
-.form-label--sub {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
 }
 
 .req {
@@ -437,72 +429,71 @@ async function onSubmit() {
 }
 
 .form-textarea {
-  resize: none;
-  overflow: hidden;
+  resize: vertical;
   min-height: 72px;
 }
 
-/* ── Toggle buttons ─────────────────────────────────── */
-
-.toggle-group {
+.choice-list {
   display: flex;
   gap: 0.75rem;
-  padding: 0 0.5rem;
 }
 
 @media (max-width: 860px) {
-  .toggle-group {
+  .choice-list {
     flex-direction: column;
-    padding: 0;
   }
 }
 
-.toggle-btn {
+.choice-card {
   flex: 1;
-  padding: 0.7rem 0.85rem;
-  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.7);
   color: var(--ink);
-  font-weight: 650;
-  font-size: 0.92rem;
   cursor: pointer;
   transition: background 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
-.toggle-btn:hover {
+.choice-card:hover {
   border-color: rgba(123, 143, 122, 0.4);
 }
 
-.toggle-btn--active {
+.choice-card--active {
   background: linear-gradient(145deg, rgba(123, 143, 122, 0.9), rgba(123, 143, 122, 0.72));
   color: white;
   border-color: rgba(123, 143, 122, 0.38);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
 }
 
-/* ── Expand/collapse sections ───────────────────────── */
-
-.form-section {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 300ms cubic-bezier(0.33, 1, 0.68, 1);
+.choice-card__input {
+  margin: 0;
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  accent-color: rgba(123, 143, 122, 0.95);
 }
 
-.form-section__inner {
-  overflow: clip;
-  min-height: 0;
-  padding: 0 8px;
-  opacity: 0;
-  transition: opacity 220ms ease;
+.choice-card__label {
+  font-weight: 650;
+  font-size: 0.95rem;
 }
 
-.form-section--open {
-  grid-template-rows: 1fr;
+.detail-block {
+  margin-bottom: 1rem;
 }
 
-.form-section--open .form-section__inner {
-  opacity: 1;
+.detail-block--sub {
+  padding-left: 0.35rem;
+  border-left: 2px solid rgba(123, 143, 122, 0.18);
+}
+
+.form-label--sub {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 /* ── Dividers ───────────────────────────────────────── */
@@ -532,7 +523,7 @@ async function onSubmit() {
 /* ── Submit button ──────────────────────────────────── */
 
 .submit-btn {
-  width: 50%;
+  min-width: min(240px, 100%);
   gap: 0.4rem;
   box-shadow: none;
 }

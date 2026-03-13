@@ -44,13 +44,13 @@
 }
 
 /* Scroll-triggered reveal */
-[data-reveal] {
+.has-reveal-js [data-reveal] {
     opacity: 0;
     transform: translateY(18px);
     transition: opacity 600ms ease, transform 600ms ease;
 }
 
-[data-reveal].is-visible {
+.has-reveal-js [data-reveal].is-visible {
     opacity: 1;
     transform: translateY(0);
 }
